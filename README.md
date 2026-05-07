@@ -8,8 +8,8 @@ Sayram  tumani uchun mahalliy taxi platformasi backend API si.
 
 | Texnologiya            | Versiya | Maqsad                                  |
 |------------------------|---------|-----------------------------------------|
-| Python                 | 3.12    | Asosiy til                              |
-| Django                 | 5.2     | Web framework                           |
+| Python                 | 3.11    | Asosiy til                              |
+| Django                 | 5.1     | Web framework                           |
 | Django REST Framework  | 3.16    | API                                     |
 | Simple JWT             | 5.5     | Autentifikatsiya + Logout (blacklist)   |
 | drf-spectacular        | 0.29    | Swagger / OpenAPI                       |
