@@ -1,0 +1,73 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  test:
+    name: Tests
+    runs-on: ubuntu-latest
+
+    services:
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install -r requirements-dev.txt
+
+      - name: Run tests with coverage
+        env:
+          DJANGO_SETTINGS_MODULE: TezYetTaxi.settings_test
+          SECRET_KEY: ci-test-secret-key-not-real
+          ALLOWED_HOSTS: localhost,testserver
+          DEBUG: "True"
+          SMS_SKIP_IN_DEV: "True"
+          REDIS_URL: redis://localhost:6379/0
+          POSTGRES_PASSWORD: test
+        run: |
+          coverage run manage.py test apps.users apps.orders apps.reviews -v 2
+          coverage report --fail-under=75
+
+  lint:
+    name: Syntax Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Check syntax
+        run: |
+          find . -name "*.py" -not -path "./.git/*" | xargs python -m py_compile
+          echo "All .py files OK"
+
+  docker:
+    name: Docker Build
+    runs-on: ubuntu-latest
+    needs: [test, lint]
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build image
+        run: docker build -t tezyettaxi:${{ github.sha }} .
+      - name: Verify
+        run: docker image inspect tezyettaxi:${{ github.sha }}
