@@ -89,13 +89,14 @@ jobs:
             git pull origin main
 
             echo "==> Building and restarting..."
-            docker compose -f docker-compose.prod.yml up -d --build
+            docker-compose -f docker-compose.server.yml up -d --build
 
             echo "==> Cleaning old images..."
             docker image prune -f
 
             echo "==> Health check..."
-            sleep 10
-            curl -f http://localhost/health/ || exit 1
+            sleep 15
+            curl -f http://localhost:8000/health/ || exit 1
 
             echo "==> Deploy complete!"
+
