@@ -34,6 +34,8 @@ def send_otp_sms(phone: str, code: str) -> bool:
 
     try:
         response = requests.post(url, json=payload, headers=headers, timeout=10)
+        if response.status_code != 200:
+            logger.error(f"Infobip xatosi: {response.status_code} - {response.text}")
         response.raise_for_status()
         logger.info(f"SMS yuborildi: {masked}")
         return True
