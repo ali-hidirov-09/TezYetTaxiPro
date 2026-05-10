@@ -5,7 +5,7 @@ from django.core.cache import cache
 logger = logging.getLogger(__name__)
 
 OTP_EXPIRE_SECONDS = 120    # Kod 2 daqiqa amal qiladi
-OTP_COOLDOWN_SECONDS = 60   # Qayta yuborishdan oldin kutish
+OTP_COOLDOWN_SECONDS = 60   # Qayta yuborishdan oldin kutish yani 60 soniya ichida faqat 1 marta kod yuborishi mumkin
 MAX_VERIFY_ATTEMPTS = 5     # Noto'g'ri urinishlar limiti
 
 
@@ -30,12 +30,12 @@ def generate_otp(phone: str) -> str | None:
     if cache.get(_cooldown_key(phone)):
         return None
 
-    # 100000–999999 oralig'ida kriptografik tasodifiy 6 xonali son
+    # 100000–999999 oralig'ida tasodifiy 6 xonali son yasab beradi
     code = str(secrets.randbelow(900_000) + 100_000)
 
     cache.set(_otp_key(phone), code, timeout=OTP_EXPIRE_SECONDS)
     cache.set(_cooldown_key(phone), True, timeout=OTP_COOLDOWN_SECONDS)
-    # Yangi kod yaratilganda urinishlar hisoblagichini tozalaymiz
+    # Yangi kod yaratilganda urinishlar hisoblagichini tozalaydi
     cache.delete(_attempts_key(phone))
 
     logger.info(f"OTP yuborildi: ...{phone[-4:]}")
@@ -65,7 +65,6 @@ def verify_otp(phone: str, code: str) -> bool:
         )
         return False
 
-    # To'g'ri — hammasini tozalaymiz
     cache.delete(_otp_key(phone))
     cache.delete(_cooldown_key(phone))
     cache.delete(_attempts_key(phone))
@@ -81,5 +80,5 @@ def get_remaining_seconds(phone: str) -> int:
 
 
 def is_blocked(phone: str) -> bool:
-    """Telefon raqami bruteforce tufayli bloklanganmi?"""
+    """Telefon raqami bruteforce tufayli bloklanganmi? shuni tekshiradi"""
     return cache.get(_attempts_key(phone), 0) >= MAX_VERIFY_ATTEMPTS
