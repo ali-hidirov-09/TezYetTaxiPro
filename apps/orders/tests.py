@@ -1,3 +1,8 @@
+"""
+Bu tests fayli kodlar qanchalik to'g'ri ishlayotgani va kod o'zgartirganda xar
+safar swaggerga kirirb o'tirmay python manage.py tests qilib
+ tezroq sinab ko'rish uchun yozilgan
+"""
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from rest_framework import status
