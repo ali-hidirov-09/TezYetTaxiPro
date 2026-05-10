@@ -8,7 +8,6 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from drf_spectacular.utils import extend_schema, OpenApiResponse, OpenApiExample
-
 from apps.users.models import DriverProfile
 from apps.users.permissions import IsClient
 from apps.orders.models import Order
