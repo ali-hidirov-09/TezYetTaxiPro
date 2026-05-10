@@ -1,6 +1,5 @@
 import logging
 from django.contrib.auth import get_user_model
-from django.core.cache import cache
 from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.pagination import PageNumberPagination
@@ -8,8 +7,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import TokenError
-from drf_spectacular.utils import extend_schema, OpenApiResponse, OpenApiExample
-
+from drf_spectacular.utils import extend_schema, OpenApiResponse
 from .models import DriverProfile
 from .otp_service import generate_otp, verify_otp, get_remaining_seconds, is_blocked
 from .permissions import IsAdminUser, IsDriver
