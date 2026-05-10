@@ -1,10 +1,14 @@
+"""
+Bu tests fayli kodlar qanchalik to'g'ri ishlayotgani va kod o'zgartirganda xar
+safar swaggerga kirirb o'tirmay python manage.py tests qilib
+ tezroq sinab ko'rish uchun yozilgan
+"""
 from unittest.mock import patch
 from django.contrib.auth import get_user_model
 from django.core.cache import cache
 from django.test import TestCase
 from rest_framework import status
 from rest_framework.test import APIClient
-
 from apps.users.models import DriverProfile
 from apps.users.otp_service import generate_otp, verify_otp, get_remaining_seconds, is_blocked
 import uuid
