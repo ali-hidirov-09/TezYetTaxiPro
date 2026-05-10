@@ -2,13 +2,13 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    # Mijoz
+    # user
     path("estimate/", views.EstimatePriceView.as_view(), name="order-estimate"),
     path("", views.OrderListCreateView.as_view(), name="order-list-create"),
     path("<int:pk>/", views.OrderDetailView.as_view(), name="order-detail"),
     path("<int:pk>/cancel/", views.OrderCancelView.as_view(), name="order-cancel"),
 
-    # Haydovchi
+    # Driver
     path("driver/available/", views.DriverAvailableOrdersView.as_view(), name="driver-available"),
     path("driver/my/", views.DriverMyOrdersView.as_view(), name="driver-my-orders"),
     path("<int:pk>/accept/", views.OrderAcceptView.as_view(), name="order-accept"),
