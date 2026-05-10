@@ -10,7 +10,6 @@ from drf_spectacular.utils import (
     extend_schema, OpenApiResponse, OpenApiExample, OpenApiParameter,
 )
 from drf_spectacular.types import OpenApiTypes
-
 from apps.users.permissions import IsClient, IsDriver, IsAdminUser
 from .models import Order
 from .serializers import (
