@@ -53,7 +53,7 @@ class CreateReviewView(APIView):
         with transaction.atomic():
 
             order = get_object_or_404(
-                Order.objects.select_for_update(),
+                Order.objects.select_for_update().select_related("driver__user"),
                 pk=order_id
             )
 
@@ -69,10 +69,6 @@ class CreateReviewView(APIView):
                     {"detail": "Bu buyurtmada haydovchi topilmadi."},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
-
-            driver = order.driver
-            if driver is None:
-                return Response({"detail": "Haydovchi topilmadi."}, status=400)
 
             review = Review.objects.create(
                 order=order,
