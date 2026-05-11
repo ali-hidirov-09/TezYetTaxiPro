@@ -112,6 +112,10 @@ class OrderListCreateView(APIView):
         )
 
         logger.info(f"Yangi buyurtma #{order.pk} yaratildi")
+
+        # Ulangan haydovchilarga WebSocket orqali xabar yuborish
+        services.notify_new_order_created(order)
+
         return Response(OrderSerializer(order).data, status=status.HTTP_201_CREATED)
 
 
