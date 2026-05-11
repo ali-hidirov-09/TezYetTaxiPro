@@ -22,6 +22,13 @@ CACHES = {
     }
 }
 
+# WebSocket testlarda InMemoryChannelLayer ishlatiladi — Redis kerak emas
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer",
+    }
+}
+
 SMS_SKIP_IN_DEV = True
 GOOGLE_MAPS_API_KEY = ""
 
@@ -31,12 +38,10 @@ REST_FRAMEWORK = {
     "DEFAULT_THROTTLE_RATES": {},
 }
 
-# Tezlashtirilgan parol hash
 PASSWORD_HASHERS = [
     "django.contrib.auth.hashers.MD5PasswordHasher",
 ]
 
-# HTTPS sozlamalari testda kerak emas, shuning uchun False qilamiz
 SECURE_SSL_REDIRECT = False
 SESSION_COOKIE_SECURE = False
 CSRF_COOKIE_SECURE = False

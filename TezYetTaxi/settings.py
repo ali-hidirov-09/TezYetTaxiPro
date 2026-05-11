@@ -10,12 +10,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 def _require_env(name: str) -> str:
-    """O'rnatilmagan muhim env o'zgaruvchini xato bilan to'xtatadi."""
     value = os.getenv(name)
     if not value:
         raise ImproperlyConfigured(
-            f"'{name}' muhit o'zgaruvchisi o'rnatilmagan. "
-            f".env.example faylini ko'ring."
+            f"'{name}' muhit o'zgaruvchisi o'rnatilmagan. .env.example faylini ko'ring."
         )
     return value
 
@@ -28,6 +26,7 @@ if not ALLOWED_HOSTS and not DEBUG:
     raise ImproperlyConfigured("ALLOWED_HOSTS production da bo'sh bo'lmasligi kerak.")
 
 INSTALLED_APPS = [
+    "daphne",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -35,6 +34,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
 
+    "channels",
     "rest_framework",
     "rest_framework_simplejwt",
     "rest_framework_simplejwt.token_blacklist",
@@ -76,6 +76,8 @@ TEMPLATES = [
     },
 ]
 
+# ASGI application — channels uchun
+ASGI_APPLICATION = "TezYetTaxi.asgi.application"
 WSGI_APPLICATION = "TezYetTaxi.wsgi.application"
 
 DATABASES = {
@@ -87,9 +89,7 @@ DATABASES = {
         "HOST": os.getenv("POSTGRES_HOST", "db"),
         "PORT": os.getenv("POSTGRES_PORT", "5432"),
         "CONN_MAX_AGE": 60,
-        "OPTIONS": {
-            "connect_timeout": 10,
-        },
+        "OPTIONS": {"connect_timeout": 10},
     }
 }
 
@@ -112,6 +112,7 @@ STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 AUTH_USER_MODEL = "users.User"
 
+# --- REST Framework ---
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
@@ -134,6 +135,7 @@ REST_FRAMEWORK = {
     },
 }
 
+# --- JWT ---
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
@@ -142,23 +144,21 @@ SIMPLE_JWT = {
     "UPDATE_LAST_LOGIN": True,
 }
 
+# --- Swagger ---
 SPECTACULAR_SETTINGS = {
     "TITLE": "TezYet Taxi API",
     "DESCRIPTION": (
         "Sayram / Turkiston tumani uchun mahalliy taxi platformasi.\n\n"
-        "**Auth oqimi:**\n"
-        "1. `POST /api/users/auth/send-otp/` — OTP yuborish\n"
-        "2. Yangi: `POST /api/users/auth/register/`\n"
-        "3. Mavjud: `POST /api/users/auth/verify-otp/`\n"
-        "4. `Authorization: Bearer <access_token>`\n"
-        "5. Token yangilash: `POST /api/users/auth/token/refresh/`\n"
-        "6. Chiqish: `POST /api/users/auth/logout/`"
+        "**Auth:** OTP → register/verify-otp → Bearer token\n\n"
+        "**WebSocket:** wss://taxifast.uz/ws/orders/{order_id}/ — buyurtma holati\n"
+        "wss://taxifast.uz/ws/driver/ — haydovchi uchun yangi buyurtmalar"
     ),
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
     "COMPONENT_SPLIT_REQUEST": True,
 }
 
+# --- Redis cache ---
 REDIS_URL = os.getenv("REDIS_URL", "redis://redis:6379/0")
 CACHES = {
     "default": {
@@ -168,11 +168,23 @@ CACHES = {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
             "SOCKET_CONNECT_TIMEOUT": 5,
             "SOCKET_TIMEOUT": 5,
-            "IGNORE_EXCEPTIONS": False,
         },
     }
 }
 
+# --- Django Channels — WebSocket uchun Redis layer ---
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [REDIS_URL],
+            "capacity": 1500,
+            "expiry": 10,
+        },
+    }
+}
+
+# --- CORS ---
 CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOWED_ORIGINS = [
     o.strip()
@@ -182,6 +194,7 @@ CORS_ALLOWED_ORIGINS = [
 if DEBUG and not CORS_ALLOWED_ORIGINS:
     CORS_ALLOW_ALL_ORIGINS = True
 
+# --- Security headers (production) ---
 if not DEBUG:
     SECURE_HSTS_SECONDS = 31536000
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
@@ -193,11 +206,13 @@ if not DEBUG:
     SECURE_CONTENT_TYPE_NOSNIFF = True
     X_FRAME_OPTIONS = "DENY"
 
+# --- Infobip SMS ---
 INFOBIP_API_KEY = os.getenv("INFOBIP_API_KEY", "")
 INFOBIP_BASE_URL = os.getenv("INFOBIP_BASE_URL", "")
 INFOBIP_SENDER = os.getenv("INFOBIP_SENDER", "TezYet")
 SMS_SKIP_IN_DEV = os.getenv("SMS_SKIP_IN_DEV", "False") == "True"
 
+# --- Google Maps ---
 GOOGLE_MAPS_API_KEY = os.getenv("GOOGLE_MAPS_API_KEY", "")
 
 # --- Sentry ---
@@ -206,19 +221,15 @@ if SENTRY_DSN:
     import sentry_sdk
     sentry_sdk.init(dsn=SENTRY_DSN, traces_sample_rate=0.2)
 
+# --- Logging ---
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
     "formatters": {
-        "standard": {
-            "format": "[%(asctime)s] %(levelname)s %(name)s: %(message)s",
-        },
+        "standard": {"format": "[%(asctime)s] %(levelname)s %(name)s: %(message)s"},
     },
     "handlers": {
-        "console": {
-            "class": "logging.StreamHandler",
-            "formatter": "standard",
-        },
+        "console": {"class": "logging.StreamHandler", "formatter": "standard"},
     },
     "root": {"handlers": ["console"], "level": "INFO"},
     "loggers": {
