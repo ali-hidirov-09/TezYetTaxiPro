@@ -87,7 +87,11 @@ class OrderStatusConsumer(AsyncWebsocketConsumer):
         """
         await self.send(text_data=json.dumps(event["data"]))
 
-
+    async def location_update(self, event):
+        """
+        Haydovchi joylashuvi yangilanganda mijozga yuboriladi.
+        """
+        await self.send(text_data=json.dumps(event["data"]))
 
     @database_sync_to_async
     def _check_access(self, user, order_id: int) -> bool:
