@@ -20,7 +20,6 @@ from .sms_service import send_otp_sms
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 from apps.orders.models import Order
-from apps.orders.consumers import order_group_name
 
 User = get_user_model()
 logger = logging.getLogger(__name__)
@@ -288,6 +287,7 @@ class DriverLocationView(APIView):
         ).first()
 
         if active_order:
+            from apps.orders.consumers import order_group_name
             channel_layer = get_channel_layer()
             if channel_layer is not None:
                 try:
@@ -306,6 +306,7 @@ class DriverLocationView(APIView):
                     logger.error(f"WS location notify xato: {e}")
 
         return Response({"detail": "Joylashuv yangilandi."})
+
 
 class AdminCreateDriverView(APIView):
     permission_classes = [IsAdminUser]
