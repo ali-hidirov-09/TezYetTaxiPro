@@ -17,6 +17,10 @@ from .serializers import (
     CreateDriverSerializer, AdminUserListSerializer,
 )
 from .sms_service import send_otp_sms
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
+from apps.orders.models import Order
+from apps.orders.consumers import order_group_name
 
 User = get_user_model()
 logger = logging.getLogger(__name__)
@@ -276,8 +280,32 @@ class DriverLocationView(APIView):
             update_fields.append("is_available")
 
         profile.save(update_fields=update_fields)
-        return Response({"detail": "Joylashuv yangilandi."})
 
+        # Aktiv buyurtma bo'lsa mijozga joylashuvni WebSocket orqali yubor
+        active_order = Order.objects.filter(
+            driver=profile,
+            status__in=[Order.STATUS_ACCEPTED, Order.STATUS_IN_PROGRESS]
+        ).first()
+
+        if active_order:
+            channel_layer = get_channel_layer()
+            if channel_layer is not None:
+                try:
+                    async_to_sync(channel_layer.group_send)(
+                        order_group_name(active_order.pk),
+                        {
+                            "type": "location.update",
+                            "data": {
+                                "type": "location.update",
+                                "lat": float(profile.current_lat),
+                                "lon": float(profile.current_lon),
+                            },
+                        }
+                    )
+                except Exception as e:
+                    logger.error(f"WS location notify xato: {e}")
+
+        return Response({"detail": "Joylashuv yangilandi."})
 
 class AdminCreateDriverView(APIView):
     permission_classes = [IsAdminUser]
