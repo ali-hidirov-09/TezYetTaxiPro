@@ -14,12 +14,10 @@ python manage.py migrate --noinput
 echo "==> Static files..."
 python manage.py collectstatic --noinput
 
-echo "==> Server ishga tushmoqda..."
-WORKERS=${GUNICORN_WORKERS:-3}
-exec gunicorn TezYetTaxi.wsgi:application \
-    --bind 0.0.0.0:8000 \
-    --workers "$WORKERS" \
-    --timeout 120 \
-    --access-logfile - \
-    --error-logfile - \
-    --log-level info
+echo "==> Server ishga tushmoqda (Daphne ASGI)..."
+exec daphne \
+    -b 0.0.0.0 \
+    -p 8000 \
+    --access-log - \
+    --proxy-headers \
+    TezYetTaxi.asgi:application

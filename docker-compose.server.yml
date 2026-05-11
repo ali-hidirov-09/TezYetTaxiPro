@@ -11,8 +11,6 @@ services:
       redis:
         condition: service_healthy
     restart: always
-    environment:
-      - GUNICORN_WORKERS=${GUNICORN_WORKERS:-3}
 
   db:
     image: postgres:16-alpine
