@@ -30,6 +30,7 @@ ACTIVE_STATUSES = [
 
 
 class EstimatePriceView(APIView):
+    """Tahminiy narh yaratuvchi view"""
     permission_classes = [IsAuthenticated]
 
     @extend_schema(
