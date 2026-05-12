@@ -36,6 +36,7 @@ def _get_tokens(user) -> dict:
 
 
 class SendOtpView(APIView):
+    """OTP code yuboruvchi view"""
     permission_classes = [AllowAny]
 
     @extend_schema(
@@ -96,6 +97,7 @@ class SendOtpView(APIView):
 
 
 class VerifyOtpLoginView(APIView):
+    """OTP code ni tasdiqlash uchun yozilgan view"""
     permission_classes = [AllowAny]
 
     @extend_schema(
