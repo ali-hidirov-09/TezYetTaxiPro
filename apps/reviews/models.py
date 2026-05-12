@@ -5,7 +5,7 @@ from django.conf import settings
 
 class Review(models.Model):
     """
-    Har bir yakunlangan safar uchun faqat bitta review.
+    Har bir yakunlangan safar uchun faqat bitta review berishga ruxsat.
     OneToOneField bu qoidani DB darajasida ta'minlaydi.
     """
 
