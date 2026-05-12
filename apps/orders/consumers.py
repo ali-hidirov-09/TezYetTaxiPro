@@ -70,7 +70,6 @@ class OrderStatusConsumer(AsyncWebsocketConsumer):
         await self.accept()
         logger.info(f"WS ulandi: {user.phone} → order #{order_id}")
 
-        # Ulanganida hozirgi holat yuboriladi
         await self._send_current_status()
 
     async def disconnect(self, close_code):
@@ -78,7 +77,7 @@ class OrderStatusConsumer(AsyncWebsocketConsumer):
             await self.channel_layer.group_discard(self.group_name, self.channel_name)
 
     async def receive(self, text_data):
-        # Mijozdan xabar kutilmaydi — faqat server yuboradi
+        """ Mijozdan xabar kutilmaydi — faqat server habar yuboradi"""
         pass
 
     async def order_update(self, event):
