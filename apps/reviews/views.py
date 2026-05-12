@@ -53,7 +53,7 @@ class CreateReviewView(APIView):
         with transaction.atomic():
 
             order = get_object_or_404(
-                Order.objects.select_for_update().select_related("driver__user"),
+                Order.objects.select_for_update(),
                 pk=order_id
             )
 
