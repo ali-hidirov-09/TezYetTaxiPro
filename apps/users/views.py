@@ -211,6 +211,16 @@ class LogoutView(APIView):
         summary="Chiqish (Logout)",
         description="Refresh tokenni bekor qiladi.",
         tags=["Auth"],
+        request={
+            "application/json": {
+                "type": "object",
+                "properties": {
+                    "refresh": {"type": "string"}
+                },
+                "required": ["refresh"]
+            }
+        },
+        responses={200: {"type": "object", "properties": {"detail": {"type": "string"}}}}
     )
     def post(self, request):
         refresh_token = request.data.get("refresh")
