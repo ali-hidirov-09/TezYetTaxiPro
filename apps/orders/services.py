@@ -7,7 +7,6 @@ from django.conf import settings
 from django.utils import timezone
 from django.db.models import F
 from apps.users.models import DriverProfile
-
 from .models import Order
 
 logger = logging.getLogger(__name__)
