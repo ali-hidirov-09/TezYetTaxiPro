@@ -1,3 +1,4 @@
+"""Bu fayl ba'zi APIlarni Web Socketda ishlashi uchun yaratildi"""
 import logging
 from urllib.parse import parse_qs
 from channels.middleware import BaseMiddleware

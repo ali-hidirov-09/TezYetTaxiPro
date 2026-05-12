@@ -1,3 +1,4 @@
+"""Websocketga ulangan apilarni urllari"""
 from django.urls import re_path
 from . import consumers
 

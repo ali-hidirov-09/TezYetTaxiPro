@@ -1,3 +1,4 @@
+"""Bu fayl ba'zi APIlarni Web Socketda ishlashi uchun yaratildi"""
 import json
 import logging
 from channels.generic.websocket import AsyncWebsocketConsumer
